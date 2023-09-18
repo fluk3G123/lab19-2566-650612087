@@ -12,6 +12,7 @@ import {
   Title,
 } from "@mantine/core";
 import axios from "axios";
+import { set } from "lodash";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -36,10 +37,12 @@ export default function Home() {
   };
 
   const loadMyCourses = async () => {
+    setLoadingMyCourses(true);
     const resp = await axios.get("/api/enrollment", {
       headers: { Authorization: `Bearer ${token}` },
     });
     setMyCourses(resp.data.courses);
+    setLoadingMyCourses(false);
   };
 
   useEffect(() => {
@@ -53,6 +56,7 @@ export default function Home() {
   }, [token]);
 
   const login = async () => {
+    setLoadingLogin(true);
     try {
       const resp = await axios.post("/api/user/login", { username, password });
       setToken(resp.data.token);
@@ -64,12 +68,15 @@ export default function Home() {
         alert(error.response.data.message);
       }
     }
+    setLoadingLogin(false);
   };
 
   const logout = () => {
     setAuthenUsername(null);
     setToken(null);
     setMyCourses(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
   };
 
   return (
@@ -105,7 +112,9 @@ export default function Home() {
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
-              <Button onClick={login}>Login</Button>
+              <Button onClick={login} disabled={loadingLogin}>
+                {!loadingLogin ? "Login" : "Login..."}
+              </Button>
             </Group>
           )}
           {authenUsername && (
@@ -133,9 +142,9 @@ export default function Home() {
             ))}
 
           {/* Do something with below loader!! */}
-          <Loader variant="dots" />
+          {loadingMyCourses && <Loader variant="dots" />}
         </Paper>
-        <Footer year="2023" fullName="Chayanin Suatap" studentId="650610560" />
+        <Footer year="2023" fullName="Nithipong Howong" studentId="650612087" />
       </Stack>
     </Container>
   );
